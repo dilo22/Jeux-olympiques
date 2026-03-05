@@ -70,10 +70,28 @@ class DBManager:
         return athletes
     def fetch_athletes2(self):
         query = """
-            SELECT a.nom_athlete, a.prenom_athlete, a.sexe_athlete, a.id_delegation, 
-                a.id_athlete, a.nb_medaille_or, a.nb_medaille_argent, a.nb_medaille_bronze, a.id_discipline
+            SELECT
+                a.nom_athlete,
+                a.prenom_athlete,
+                a.sexe_athlete,
+                d.nom_delegation,
+                a.id_athlete,
+                a.nb_medaille_or,
+                a.nb_medaille_argent,
+                a.nb_medaille_bronze,
+                a.id_discipline
             FROM athlete a
-            ORDER BY (nb_medaille_or + nb_medaille_argent + nb_medaille_bronze) DESC
+            JOIN delegation d ON a.id_delegation = d.id_delegation
+            WHERE (COALESCE(a.nb_medaille_or, 0)
+                + COALESCE(a.nb_medaille_argent, 0)
+                + COALESCE(a.nb_medaille_bronze, 0)) > 0
+            ORDER BY (COALESCE(a.nb_medaille_or, 0)
+                    + COALESCE(a.nb_medaille_argent, 0)
+                    + COALESCE(a.nb_medaille_bronze, 0)) DESC,
+                    a.nb_medaille_or DESC,
+                    a.nb_medaille_argent DESC,
+                    a.nb_medaille_bronze DESC,
+                    a.nom_athlete ASC
         """
         try:
             cursor = self.conn.cursor()
@@ -330,7 +348,36 @@ class DBManager:
         cursor = self.conn.cursor()
         cursor.execute(query)
         return cursor.fetchall()
-
+    def fetch_delegations_sorted_by_medals(self):
+        query = """
+            SELECT
+                d.id_delegation,
+                d.nom_delegation,
+                d.continent,
+                COALESCE(d.nb_medaille_or, 0) AS or_,
+                COALESCE(d.nb_medaille_argent, 0) AS argent,
+                COALESCE(d.nb_medaille_bronze, 0) AS bronze
+            FROM delegation d
+            WHERE (COALESCE(d.nb_medaille_or, 0)
+                + COALESCE(d.nb_medaille_argent, 0)
+                + COALESCE(d.nb_medaille_bronze, 0)) > 0
+            ORDER BY (COALESCE(d.nb_medaille_or, 0)
+                    + COALESCE(d.nb_medaille_argent, 0)
+                    + COALESCE(d.nb_medaille_bronze, 0)) DESC,
+                    COALESCE(d.nb_medaille_or, 0) DESC,
+                    COALESCE(d.nb_medaille_argent, 0) DESC,
+                    COALESCE(d.nb_medaille_bronze, 0) DESC,
+                    d.nom_delegation ASC
+        """
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(query)
+            return cursor.fetchall()
+        except Exception as e:
+            print(f"Erreur lors de la récupération des délégations : {e}")
+            return []
+        finally:
+            cursor.close()
     def fetch_all_participations(self):
         query = "SELECT * FROM participation"
         cursor = self.conn.cursor()
@@ -397,13 +444,13 @@ class DBManager:
         finally:
             cursor.close()
 
-    def fetch_delegations_sorted_by_medals(self):
+    """def fetch_delegations_sorted_by_medals(self):
         delegations = []
-        query = """ 
+        query = 
             SELECT id_delegation, nom_delegation, continent, nb_medaille_or, nb_medaille_argent, nb_medaille_bronze
             FROM delegation
             ORDER BY (nb_medaille_or + nb_medaille_argent + nb_medaille_bronze) DESC
-        """
+        
         try:
             cursor = self.conn.cursor()
             cursor.execute(query)
@@ -413,34 +460,39 @@ class DBManager:
         finally:
             cursor.close()
         
-        return delegations
+        return delegations"""
 
     def fetch_epreuves_filtrees(self, date, equipe=None, sport=None, genre=None, phase=None):
         epreuves = []
         if self.conn:
+            cursor = None
             try:
                 cursor = self.conn.cursor()
 
-                # Requête principale mise à jour avec une jointure sur la table discipline
                 query = """
-                    SELECT 
-                        ev.nom_evenement,  -- Sélection du nom de l'événement
+                    SELECT DISTINCT
+                        ev.nom_evenement,
                         m.phase
                     FROM match m
                     JOIN evenement ev ON m.id_evenement = ev.id_evenement
-                    JOIN discipline d ON ev.id_discipline = d.id_discipline  -- Jointure avec la table discipline
+                    JOIN discipline dis ON ev.id_discipline = dis.id_discipline
+
+                    LEFT JOIN participation p ON p.id_match = m.id_match
+                    LEFT JOIN participant par ON par.id_participant = p.id_participant
+                    LEFT JOIN delegation d ON d.id_delegation = par.id_delegation
+
                     WHERE m.date::date = %s
                 """
-                params = [date]  # Paramètre pour la date
+                params = [date]
 
-                # Filtres supplémentaires
+                # Filtrer par équipe (nom de délégation)
                 if equipe and equipe != "Toutes les équipes":
-                    query += " AND ev.id_delegation = %s"
+                    query += " AND d.nom_delegation = %s"
                     params.append(equipe)
 
                 # Filtrer par sport (discipline)
                 if sport and sport != "Tous les sports":
-                    query += " AND d.nom_discipline = %s"
+                    query += " AND dis.nom_discipline = %s"
                     params.append(sport)
 
                 # Filtrer par genre
@@ -460,7 +512,8 @@ class DBManager:
                 print(f"Erreur lors de la récupération des épreuves filtrées : {e}")
                 self.conn.rollback()
             finally:
-                cursor.close()
+                if cursor:
+                    cursor.close()
 
         return epreuves
 
