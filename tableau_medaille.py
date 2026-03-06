@@ -43,21 +43,29 @@ class TableauMedaille:
         self.canvas.bind("<Enter>", self._bind_mousewheel)
         self.canvas.bind("<Leave>", self._unbind_mousewheel)
 
+        # Conteneur centré horizontalement
+        self.container.grid_columnconfigure(0, weight=1)
+        self.container.grid_columnconfigure(1, weight=0)
+        self.container.grid_columnconfigure(2, weight=1)
+
+        self.content_frame = tk.Frame(self.container, bg=self.BG)
+        self.content_frame.grid(row=0, column=1, pady=5)
+
         title = tk.Label(
-            self.container,
+            self.content_frame,
             text="Tableau des Médailles",
             font=("Helvetica", 16, "bold"),
             bg=self.BG,
             fg=self.HEADER_FG
         )
-        title.grid(row=0, column=0, columnspan=6, pady=(5, 12), sticky="w", padx=20)
+        title.grid(row=0, column=0, pady=(5, 12))
 
         # Header
-        self.header_bar = tk.Frame(self.container, bg=self.BG)
-        self.header_bar.grid(row=1, column=0, columnspan=6, sticky="ew", padx=20)
+        self.header_bar = tk.Frame(self.content_frame, bg=self.BG)
+        self.header_bar.grid(row=1, column=0)
 
         self.header_bar.grid_columnconfigure(0, minsize=self.COL_FLAG_W)
-        self.header_bar.grid_columnconfigure(1, weight=1)
+        self.header_bar.grid_columnconfigure(1, minsize=220)
         self.header_bar.grid_columnconfigure(2, minsize=self.COL_NUM_W)
         self.header_bar.grid_columnconfigure(3, minsize=self.COL_NUM_W)
         self.header_bar.grid_columnconfigure(4, minsize=self.COL_NUM_W)
@@ -75,8 +83,8 @@ class TableauMedaille:
                 anchor="w" if col == 1 else "center"
             ).grid(row=0, column=col, padx=6, pady=8, sticky="ew")
 
-        self.list_frame = tk.Frame(self.container, bg=self.BG)
-        self.list_frame.grid(row=2, column=0, columnspan=6, sticky="ew", padx=20)
+        self.list_frame = tk.Frame(self.content_frame, bg=self.BG)
+        self.list_frame.grid(row=2, column=0)
 
     # ---------------- Flags ----------------
     def _normalize(self, text: str) -> str:
@@ -137,10 +145,10 @@ class TableauMedaille:
                 highlightbackground=self.CARD_BORDER
             )
 
-            card.grid(row=idx, column=0, columnspan=6, sticky="ew", pady=6)
+            card.grid(row=idx, column=0, pady=6)
 
             card.grid_columnconfigure(0, minsize=self.COL_FLAG_W)
-            card.grid_columnconfigure(1, weight=1)
+            card.grid_columnconfigure(1, minsize=220)
             card.grid_columnconfigure(2, minsize=self.COL_NUM_W)
             card.grid_columnconfigure(3, minsize=self.COL_NUM_W)
             card.grid_columnconfigure(4, minsize=self.COL_NUM_W)

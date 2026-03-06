@@ -14,7 +14,7 @@ class DBManager:
                 port="5432",
                 options="-c client_encoding=UTF8"  # Forcer l'encodage UTF-8
             )
-            print("Connexion réussie à la base de données")
+           
         except Exception as e:
             print(f"Erreur lors de la connexion à la base de données : {e}")
     def match_existe(self, id_match):

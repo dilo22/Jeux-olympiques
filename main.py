@@ -67,22 +67,68 @@ class MainApp:
         self.image_label = tk.Label(self.header_frame, image=self.photo, bg="white")
         self.image_label.pack(side=tk.TOP, pady=10)
 
-        self.title_label = tk.Label(self.header_frame, text="JEUX OLYMPIQUES 2024 PARIS", font=("Helvetica", 16, "bold"), bg="white")
+        self.title_label = tk.Label(self.header_frame,text="JEUX OLYMPIQUES 2024 PARIS",font=("Helvetica", 22, "bold"),bg="white",fg="#111827")
         self.title_label.pack(side=tk.BOTTOM, pady=10)
 
     def create_buttons(self):
         self.button_frame = tk.Frame(self.root, bg="white")
-        self.button_frame.pack(pady=10)
+        self.button_frame.pack(pady=15)
 
-        # Boutons pour basculer entre les vues avec changement de curseur
-        btn_tableau = tk.Button(self.button_frame, text="Tableau des Médailles", command=self.afficher_tableau, bg="lightblue", width=16, height=1, cursor="hand2")
-        btn_tableau.grid(row=0, column=0, padx=10)
+        BTN_BG = "#D9EEF7"
+        BTN_HOVER = "#BFE3F2"
+        BTN_FG = "#16313C"
+        BTN_ACTIVE = "#A9D9EC"
+        BTN_BORDER = "#9EC9D8"
 
-        btn_medailles = tk.Button(self.button_frame, text="Médaillé(e)s", command=self.afficher_medailles, bg="lightblue", width=16, height=1, cursor="hand2")
-        btn_medailles.grid(row=0, column=1, padx=10)
+        def on_enter(e):
+            e.widget.config(bg=BTN_HOVER)
 
-        btn_epreuves = tk.Button(self.button_frame, text="Tous les épreuves", command=self.afficher_epreuves, bg="lightblue", width=16, height=1, cursor="hand2")
-        btn_epreuves.grid(row=0, column=2, padx=10)
+        def on_leave(e):
+            e.widget.config(bg=BTN_BG)
+
+        def make_modern_button(parent, text, command):
+            btn = tk.Button(
+                parent,
+                text=text,
+                command=command,
+                bg=BTN_BG,
+                fg=BTN_FG,
+                activebackground=BTN_ACTIVE,
+                activeforeground=BTN_FG,
+                font=("Helvetica", 12, "bold"),
+                relief="flat",
+                bd=0,
+                padx=22,
+                pady=12,
+                cursor="hand2",
+                highlightthickness=1,
+                highlightbackground=BTN_BORDER,
+                highlightcolor=BTN_BORDER
+            )
+            btn.bind("<Enter>", on_enter)
+            btn.bind("<Leave>", on_leave)
+            return btn
+
+        btn_tableau = make_modern_button(
+            self.button_frame,
+            "Tableau des Médailles",
+            self.afficher_tableau
+        )
+        btn_tableau.grid(row=0, column=0, padx=12)
+
+        btn_medailles = make_modern_button(
+            self.button_frame,
+            "Médaillé(e)s",
+            self.afficher_medailles
+        )
+        btn_medailles.grid(row=0, column=1, padx=12)
+
+        btn_epreuves = make_modern_button(
+            self.button_frame,
+            "Toutes les épreuves",
+            self.afficher_epreuves
+        )
+        btn_epreuves.grid(row=0, column=2, padx=12)
 
 
     def afficher_tableau(self):
