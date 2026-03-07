@@ -87,47 +87,20 @@ class MainApp:
             e.widget.config(bg=BTN_BG)
 
         def make_modern_button(parent, text, command):
-            btn = tk.Button(
-                parent,
-                text=text,
-                command=command,
-                bg=BTN_BG,
-                fg=BTN_FG,
-                activebackground=BTN_ACTIVE,
-                activeforeground=BTN_FG,
-                font=("Helvetica", 12, "bold"),
-                relief="flat",
-                bd=0,
-                padx=22,
-                pady=12,
-                cursor="hand2",
-                highlightthickness=1,
-                highlightbackground=BTN_BORDER,
-                highlightcolor=BTN_BORDER
-            )
+            btn = tk.Button(parent,text=text,command=command,bg=BTN_BG,fg=BTN_FG,activebackground=BTN_ACTIVE,
+                            activeforeground=BTN_FG,font=("Helvetica", 12, "bold"),relief="flat",bd=0,padx=22,pady=12,
+                cursor="hand2",highlightthickness=1,highlightbackground=BTN_BORDER,highlightcolor=BTN_BORDER)
             btn.bind("<Enter>", on_enter)
             btn.bind("<Leave>", on_leave)
             return btn
 
-        btn_tableau = make_modern_button(
-            self.button_frame,
-            "Tableau des Médailles",
-            self.afficher_tableau
-        )
+        btn_tableau = make_modern_button(self.button_frame,"Tableau des Médailles",self.afficher_tableau)
         btn_tableau.grid(row=0, column=0, padx=12)
 
-        btn_medailles = make_modern_button(
-            self.button_frame,
-            "Médaillé(e)s",
-            self.afficher_medailles
-        )
+        btn_medailles = make_modern_button(self.button_frame,"Médaillé(e)s",self.afficher_medailles)
         btn_medailles.grid(row=0, column=1, padx=12)
 
-        btn_epreuves = make_modern_button(
-            self.button_frame,
-            "Toutes les épreuves",
-            self.afficher_epreuves
-        )
+        btn_epreuves = make_modern_button(self.button_frame,"Toutes les épreuves",self.afficher_epreuves)
         btn_epreuves.grid(row=0, column=2, padx=12)
 
 

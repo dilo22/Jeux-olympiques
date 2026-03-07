@@ -373,6 +373,7 @@ class DBManager:
             cursor = self.conn.cursor()
             cursor.execute(query)
             return cursor.fetchall()
+        
         except Exception as e:
             print(f"Erreur lors de la récupération des délégations : {e}")
             return []
@@ -516,11 +517,6 @@ class DBManager:
                     cursor.close()
 
         return epreuves
-
-
-
-
-
 
 
     def get_id_match_from_evenement(self, nom_evenement):
